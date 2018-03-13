@@ -74,7 +74,14 @@ describe("Campaigns", () => {
         gas: "1000000"
       });
     const request = await campaign.methods.requests(0).call();
-    // request instance of struct
+    // request is instance of struct
     assert.equal("Buy batteries", request.description);
+  });
+
+  it("processes requests", async () => {
+    await campaign.methods.contribute().send({
+      from: accounts[0],
+      value: web3.utils.toWei("10", "ether")
+    });
   });
 });
