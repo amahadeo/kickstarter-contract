@@ -22,6 +22,7 @@ beforeEach(async () => {
     from: accounts[0],
     gas: "1000000"
   });
+  // send transactions don't provide return values, need to make additional call to retrieve campaign address
 
   [campaignAddress] = await factory.methods.getDeployedCampaigns().call();
   // es6 magic to take first element from expected array and assign to 'campaignAddress'
@@ -36,5 +37,44 @@ describe("Campaigns", () => {
   it("deploys a factory and a campaign", () => {
     assert.ok(factory.options.address);
     assert.ok(campaign.options.address);
+  });
+
+  it("marks caller as the campaign manager", async () => {
+    const manager = await campaign.methods.manager().call();
+    assert.equal(accounts[0], manager);
+  });
+
+  it("allows people to contribute money and marks them as approvers", async () => {
+    await campaign.methods.contribute().send({
+      value: "200",
+      from: accounts[1]
+    });
+    // using the approvers mapping to determine this test case
+    const isContributor = await campaign.methods.approvers(accounts[1]).call();
+    assert(isContributor);
+  });
+
+  it("requires a minimum contribution", async () => {
+    try {
+      await campaign.methods.contribute().send({
+        value: "5",
+        from: accounts[1]
+      });
+      assert(false);
+    } catch (e) {
+      assert(e);
+    }
+  });
+
+  it("allows a manager to make a payment request", async () => {
+    await campaign.methods
+      .createRequest("Buy batteries", "100", accounts[1])
+      .send({
+        from: accounts[0], // has to be from manager address
+        gas: "1000000"
+      });
+    const request = await campaign.methods.requests(0).call();
+    // request instance of struct
+    assert.equal("Buy batteries", request.description);
   });
 });
