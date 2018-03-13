@@ -13,7 +13,7 @@ fs.ensureDirSync(buildPath); // check to see if path exists, if not, will create
 
 for (let contract in output) {
   fs.outputJsonSync(
-    path.resolve(buildPath, contract + ".json"), // filename argument
+    path.resolve(buildPath, contract.replace(":", "") + ".json"), // filename argument
     output[contract] // data argument
   );
 }
