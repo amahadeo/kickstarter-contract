@@ -15,7 +15,7 @@ class CampaignNew extends Component {
     // this context allows me to skip binding this
     event.preventDefault();
 
-    this.setState({ loading: true });
+    this.setState({ loading: true, errorMessage: "" });
     try {
       const accounts = await web3.eth.getAccounts();
       await factory.methods
